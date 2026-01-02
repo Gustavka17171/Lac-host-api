@@ -1,35 +1,28 @@
 import express from "express";
-import multer from "multer";
+import os from "os";
 
 const app = express();
-const upload = multer({ dest: "uploads/" });
-
-app.use(express.json());
-
-let serverStatus = {
-  online: false,
-  ram: { used: 0, total: 2 },
-  disk: { used: 0, total: 50 }
-};
-
-app.get("/", (req, res) => {
-  res.send("API FUNCIONANDO");
-});
-
-app.post("/update-status", (req, res) => {
-  serverStatus = req.body;
-  res.json({ ok: true });
-});
-
-app.get("/status", (req, res) => {
-  res.json(serverStatus);
-});
-
-app.post("/upload-map", upload.single("map"), (req, res) => {
-  res.json({ ok: true });
-});
-
 const PORT = process.env.PORT || 3000;
+
+// ROTA DE STATUS (RAM / DISCO)
+app.get("/status", (req, res) => {
+  const ramTotal = os.totalmem() / 1024 / 1024;
+  const ramFree = os.freemem() / 1024 / 1024;
+  const ramUsed = ramTotal - ramFree;
+
+  res.json({
+    ramUsed: Math.round(ramUsed),   // MB
+    ramTotal: Math.round(ramTotal), // MB
+    diskUsed: 12,                   // GB (simulado)
+    diskTotal: 50                   // GB
+  });
+});
+
+// TESTE SIMPLES (opcional)
+app.get("/", (req, res) => {
+  res.send("API LAC HOST ONLINE");
+});
+
 app.listen(PORT, () => {
-  console.log("Rodando...");
+  console.log("API rodando na porta", PORT);
 });
